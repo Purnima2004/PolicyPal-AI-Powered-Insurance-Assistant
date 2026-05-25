@@ -1,4 +1,5 @@
 from pathlib import Path
+from datetime import datetime, timezone
 import shutil
 
 from langchain_chroma import Chroma
@@ -14,6 +15,19 @@ def build_embeddings(settings: Settings) -> FastEmbedEmbeddings:
     return FastEmbedEmbeddings(model_name=settings.embedding_model)
 
 
+def active_chroma_pointer(settings: Settings) -> Path:
+    return Path(settings.chroma_dir).parent / "active_chroma_dir.txt"
+
+
+def active_chroma_dir(settings: Settings) -> Path:
+    pointer = active_chroma_pointer(settings)
+    if pointer.exists():
+        saved_path = Path(pointer.read_text(encoding="utf-8").strip())
+        if saved_path.exists():
+            return saved_path
+    return Path(settings.chroma_dir)
+
+
 def build_vector_store(chunks: list[Document], settings: Settings) -> VectorStore:
     embeddings = build_embeddings(settings)
 
@@ -24,12 +38,18 @@ def build_vector_store(chunks: list[Document], settings: Settings) -> VectorStor
         vector_store.save_local(settings.faiss_dir)
         return vector_store
 
-    shutil.rmtree(settings.chroma_dir, ignore_errors=True)
-    Path(settings.chroma_dir).mkdir(parents=True, exist_ok=True)
+    index_root = Path(settings.chroma_dir).parent / "chroma_indexes"
+    index_root.mkdir(parents=True, exist_ok=True)
+    timestamp = datetime.now(timezone.utc).strftime("%Y%m%d%H%M%S%f")
+    persist_directory = index_root / f"index_{timestamp}"
+
     vector_store = Chroma.from_documents(
         documents=chunks,
         embedding=embeddings,
-        persist_directory=settings.chroma_dir,
+        persist_directory=str(persist_directory),
+    )
+    active_chroma_pointer(settings).write_text(
+        str(persist_directory), encoding="utf-8"
     )
     return vector_store
 
@@ -46,9 +66,10 @@ def load_vector_store(settings: Settings) -> VectorStore:
             allow_dangerous_deserialization=True,
         )
 
-    if not Path(settings.chroma_dir).exists():
+    persist_directory = active_chroma_dir(settings)
+    if not persist_directory.exists():
         raise FileNotFoundError("Chroma index not found. Run: python -m src.ingest")
     return Chroma(
-        persist_directory=settings.chroma_dir,
+        persist_directory=str(persist_directory),
         embedding_function=embeddings,
     )

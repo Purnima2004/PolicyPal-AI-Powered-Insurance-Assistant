@@ -17,13 +17,8 @@ st.markdown(
     <style>
     .block-container {
         max-width: 1120px;
-        padding-top: 2rem;
-        padding-bottom: 2rem;
-    }
-    .upload-screen {
-        min-height: calc(100vh - 7rem);
-        display: grid;
-        align-items: center;
+        padding-top: 7rem;
+        padding-bottom: 1.25rem;
     }
     .upload-kicker {
         color: #38bdf8;
@@ -34,7 +29,7 @@ st.markdown(
         text-transform: uppercase;
     }
     .upload-title {
-        font-size: 3rem;
+        font-size: 2.65rem;
         font-weight: 700;
         line-height: 1.08;
         margin-bottom: 1rem;
@@ -51,7 +46,7 @@ st.markdown(
         display: flex;
         flex-wrap: wrap;
         gap: 0.6rem;
-        margin-top: 1.2rem;
+        margin-top: 1rem;
     }
     .trust-pill {
         border: 1px solid rgba(148, 163, 184, 0.28);
@@ -76,15 +71,11 @@ st.markdown(
     }
     div[data-testid="stFileUploader"] section {
         border-radius: 8px;
-        min-height: 168px;
+        min-height: 142px;
     }
     @media (max-width: 760px) {
         .block-container {
-            padding-top: 1.25rem;
-        }
-        .upload-screen {
-            min-height: auto;
-            align-items: start;
+            padding-top: 2rem;
         }
         .upload-title {
             font-size: 2.1rem;
@@ -131,8 +122,7 @@ if "policy_ready" not in st.session_state:
 
 
 if not st.session_state.policy_ready:
-    st.markdown('<div class="upload-screen">', unsafe_allow_html=True)
-    left, right = st.columns([1.15, 0.85], gap="large", vertical_alignment="center")
+    left, right = st.columns([1.15, 0.85], gap="large")
 
     with left:
         st.markdown(
@@ -190,7 +180,6 @@ if not st.session_state.policy_ready:
                 except Exception as exc:
                     st.error(f"Could not upload files: {exc}")
 
-    st.markdown("</div>", unsafe_allow_html=True)
     st.stop()
 
 
