@@ -28,7 +28,7 @@ def get_settings() -> Settings:
 
     return Settings(
         groq_api_key=os.getenv("GROQ_API_KEY", "").strip(),
-        groq_model=os.getenv("GROQ_MODEL", "llama-3.3-70b-versatile").strip(),
+        groq_model=os.getenv("GROQ_MODEL", "openai/gpt-oss-20b").strip(),
         vector_store=vector_store,
         embedding_model=os.getenv(
             "EMBEDDING_MODEL", "sentence-transformers/all-MiniLM-L6-v2"

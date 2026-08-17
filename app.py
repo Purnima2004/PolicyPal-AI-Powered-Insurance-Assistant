@@ -97,6 +97,11 @@ def save_and_prepare_files(uploaded_files) -> int:
     policies_dir = Path(settings.policies_dir)
     policies_dir.mkdir(parents=True, exist_ok=True)
 
+    # Clean existing policy files to avoid mixing previous documents
+    for file_path in policies_dir.iterdir():
+        if file_path.is_file() and file_path.name != ".gitkeep":
+            file_path.unlink()
+
     saved_count = 0
     for uploaded_file in uploaded_files:
         filename = safe_filename(uploaded_file.name)
